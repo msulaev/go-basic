@@ -1,14 +1,22 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 var f = fmt.Println
 
+const balanceFile = "balance.txt"
+
 func main() {
-	accountBalance := 1000.0
+	accountBalance, err := getBalanceFromFile()
+	if err != nil {
+		f("Error getting balance from file")
+		f(err)
+	}
 	for {
 		fmt.Println("Welcome to the Bank of Go!")
 		fmt.Println("What would you like to do?")
@@ -63,5 +71,17 @@ func main() {
 
 func writingBalanceToFile(balance float64) {
 	balanceText := fmt.Sprint(balance)
-	os.WriteFile("balance.txt", []byte(balanceText), 0644)
+	os.WriteFile(balanceFile, []byte(balanceText), 0644)
+}
+
+func getBalanceFromFile() (float64, error) {
+	data, err := os.ReadFile(balanceFile)
+	if err != nil {
+		return 1000, errors.New("error reading balance file")
+	}
+	balance, err := strconv.ParseFloat(string(data), 64)
+	if err != nil {
+		return 1000, errors.New("error converting balance to float")
+	}
+	return balance, nil
 }
