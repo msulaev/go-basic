@@ -1,32 +1,60 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
 )
 
+var file = "result.txt"
+
 func main() {
-	var revenue, expenses, taxRate float64
+	revenue, err := getUserInput("Enter revenue: ")
+	showErrorMessage(err)
 
-	outputText("Enter revenue:")
-	fmt.Scan(&revenue)
-	outputText("Enter expenses:")
-	fmt.Scan(&expenses)
-	outputText("Enter tax rate:")
-	fmt.Scan(&taxRate)
+	expenses, err := getUserInput("Enter expenses: ")
+	showErrorMessage(err)
 
-	ebt := revenue - expenses
-	profit := ebt * (1 - taxRate/100)
-	//ratio := ebt / revenue
+	taxRate, err := getUserInput("Enter tax rate: ")
+	showErrorMessage(err)
+
+	profit := calculateProfit(revenue, expenses, taxRate)
+	err = writeToFile(profit)
+	if err != nil {
+		showErrorMessage(err)
+		return
+	}
 
 	formattedFV := fmt.Sprintf("Future Value: %.1f\n", profit)
-
 	fmt.Println(formattedFV)
-	// fmt.Printf("EBT: %.1f\n", ebt)
-	// fmt.Println("EBT: ", ebt)
-	// fmt.Println("Profit: ", profit)
-	// fmt.Println("Ratio: ", ratio)
 }
 
-func outputText(text string) {
-	fmt.Print(text)
+func calculateProfit(revenue, expenses, taxRate float64) float64 {
+	ebt := revenue - expenses
+	return ebt * (1 - taxRate/100)
+}
+
+func getUserInput(prompt string) (float64, error) {
+	fmt.Print(prompt)
+	var input float64
+	_, err := fmt.Scan(&input)
+	if err != nil || input <= 0 {
+		return 0, errors.New("invalid input")
+	}
+	return input, nil
+}
+
+func writeToFile(result float64) error {
+	err := os.WriteFile(file, []byte(fmt.Sprintf("%f", result)), 0644)
+	if err != nil {
+		return errors.New("failed to write to file")
+	}
+	return nil
+}
+
+func showErrorMessage(err error) {
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 }
