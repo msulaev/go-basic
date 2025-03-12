@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		f("Error getting balance from file")
 		f(err)
+		panic("error getting balance from file")
 	}
 	for {
 		fmt.Println("Welcome to the Bank of Go!")
